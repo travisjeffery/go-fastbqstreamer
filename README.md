@@ -4,10 +4,10 @@ A fast BigQuery streaming client for Go (Golang).
 
 I was able to get >500% increase in throughput with this client compared to everything else I tried, and that limit was due to BigQuery's API crapping out rather than my small worker.
 
-This is because other BigQuery clients I looked at take in map[string]interface{} for row data, whereas I already had marshal'd JSON in bytes and couldn't afford
-to unmarshal that to pass into the client lib's API and then have the client lib marshal that again.
+This is because other BigQuery client's APIs I looked at take in map[string]interface{} for row data, whereas I already had marshal'd JSON in bytes and didn't want to pay the price to
+to unmarshal that just to pass into the client lib's API and have the client lib marshal that again.
 
-So this lib is great to put on a worker that consuming from Kafka and inserting to BigQuery. That's what I'm using it for.
+So this lib is great to put on a worker that consuming from Kafka and inserting to BigQuery, or anything else that needs high throughput. 
 
 ## Example
 
