@@ -15,11 +15,6 @@ import (
 	"google.golang.org/api/bigquery/v2"
 )
 
-const (
-	workersDefault = 4
-	scope          = bigquery.BigqueryScope
-)
-
 // Row is a row that will be inserted into BigQuery.
 type Row interface {
 	DatasetID() string
@@ -94,7 +89,7 @@ type Streamer struct {
 
 // New creates a new BQ using the given options.
 func New(opts *Options) (*Streamer, error) {
-	token := jwt.NewToken(opts.Email, scope, opts.PEM)
+	token := jwt.NewToken(opts.Email, bigquery.BigqueryScope, opts.PEM)
 	transport, err := jwt.NewTransport(token)
 	if err != nil {
 		return nil, err
@@ -107,7 +102,7 @@ func New(opts *Options) (*Streamer, error) {
 	}
 
 	if opts.Workers == 0 {
-		opts.Workers = workersDefault
+		opts.Workers = 4
 	}
 
 	if opts.BaseURL == "" {
