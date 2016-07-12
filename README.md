@@ -26,6 +26,8 @@ service.Input() <- row{
 }
 ```
 
+[GoDocs](https://godoc.org/github.com/travisjeffery/go-fastbqstreamer). 
+
 ## Author
 
 Travis Jeffery
