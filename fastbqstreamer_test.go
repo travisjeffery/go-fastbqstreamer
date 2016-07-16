@@ -32,11 +32,11 @@ func (suite *StreamerTestSuite) SetupTest() {
 	suite.server = httptest.NewServer(suite.mux)
 
 	service, err := New(&Options{
-		ProjectID:     os.Getenv("PROJECT_ID"),
-		Email:         os.Getenv("EMAIL"),
-		PEM:           []byte(os.Getenv("PEM")),
-		BaseURL:       suite.server.URL,
-		CacheInterval: time.Millisecond,
+		ProjectID:      os.Getenv("PROJECT_ID"),
+		Email:          os.Getenv("EMAIL"),
+		PEM:            []byte(os.Getenv("PEM")),
+		BaseURL:        suite.server.URL,
+		InsertInterval: time.Millisecond,
 	})
 	log.Check(err)
 
