@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/golang-lru"
 	"github.com/pquerna/ffjson/ffjson"
+	"golang.org/x/net/context"
 	"golang.org/x/oauth2/jwt"
 	"google.golang.org/api/bigquery/v2"
 )
@@ -89,12 +90,12 @@ type Streamer struct {
 
 // New creates a new BQ using the given options.
 func New(opts *Options) (*Streamer, error) {
-	token := jwt.NewToken(opts.Email, bigquery.BigqueryScope, opts.PEM)
-	transport, err := jwt.NewTransport(token)
-	if err != nil {
-		return nil, err
+	config := &jwt.Config{
+		Email:      opts.Email,
+		Scopes:     []string{bigquery.BigqueryScope},
+		PrivateKey: opts.PEM,
 	}
-	client := transport.Client()
+	client := config.Client(context.Background())
 
 	bigqueryService, err := bigquery.New(client)
 	if err != nil {
