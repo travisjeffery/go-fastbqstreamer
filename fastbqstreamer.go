@@ -9,9 +9,9 @@ import (
 	"sync"
 	"time"
 
-	"code.google.com/p/goauth2/oauth/jwt"
 	"github.com/hashicorp/golang-lru"
 	"github.com/pquerna/ffjson/ffjson"
+	"golang.org/x/oauth2/jwt"
 	"google.golang.org/api/bigquery/v2"
 )
 
