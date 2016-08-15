@@ -69,7 +69,7 @@ type Options struct {
 	CacheSize int
 
 	// Interval duration to buffer inserts.
-	InsertInterval time.Duration
+	CacheInterval time.Duration
 
 	// Base URL for BigQuery's API. You probably don't need to change this.
 	BaseURL string
@@ -114,8 +114,8 @@ func New(opts *Options) (*Streamer, error) {
 		opts.CacheSize = 50000
 	}
 
-	if opts.InsertInterval == 0 {
-		opts.InsertInterval = time.Second
+	if opts.CacheInterval == 0 {
+		opts.CacheInterval = time.Second
 	}
 
 	bq := &Streamer{
@@ -124,7 +124,7 @@ func New(opts *Options) (*Streamer, error) {
 		errors:    make(chan Error, opts.BufferSize),
 		successes: make(chan Result, opts.BufferSize),
 		input:     make(chan Row, opts.BufferSize),
-		ticker:    time.NewTicker(opts.InsertInterval),
+		ticker:    time.NewTicker(opts.CacheInterval),
 		client:    client,
 	}
 
