@@ -11,7 +11,8 @@ import (
 
 	"github.com/hashicorp/golang-lru"
 	"github.com/pquerna/ffjson/ffjson"
-	"golang.org/x/net/context"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 	"golang.org/x/oauth2/jwt"
 	"google.golang.org/api/bigquery/v2"
 )
@@ -94,8 +95,9 @@ func New(opts *Options) (*Streamer, error) {
 		Email:      opts.Email,
 		Scopes:     []string{bigquery.BigqueryScope},
 		PrivateKey: opts.PEM,
+		TokenURL:   google.JWTTokenURL,
 	}
-	client := config.Client(context.Background())
+	client := config.Client(oauth2.NoContext)
 
 	bigqueryService, err := bigquery.New(client)
 	if err != nil {
