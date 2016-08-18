@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/cenk/backoff"
 	"github.com/hashicorp/golang-lru"
 	"github.com/pquerna/ffjson/ffjson"
 	"golang.org/x/oauth2"
@@ -74,6 +75,9 @@ type Options struct {
 
 	// Base URL for BigQuery's API. You probably don't need to change this.
 	BaseURL string
+
+	// Number of times to retry requests to Big Query. Defaults to 3.
+	Retries int
 }
 
 // BQ streams rows and insert them to Google's BigQuery.
@@ -106,6 +110,10 @@ func New(opts *Options) (*Streamer, error) {
 
 	if opts.Workers == 0 {
 		opts.Workers = 4
+	}
+
+	if opts.Retries == 0 {
+		opts.Retries = 3
 	}
 
 	if opts.BaseURL == "" {
@@ -277,23 +285,35 @@ func (bq *Streamer) insert(k string, insert *bqinsert) {
 
 	buf := bytes.NewBuffer(b)
 
-	resp, err := bq.client.Post(bq.url(datasetID, tableID), "application/json", buf)
+	count := 0
 
-	if err != nil {
-		bq.errors <- Error{
-			Size:     l,
-			Err:      err,
-			Duration: time.Since(now),
+	operation := func() error {
+		resp, err := bq.client.Post(bq.url(datasetID, tableID), "application/json", buf)
+
+		if err != nil && count < bq.Retries {
+			count++
+			return err
 		}
-		return
+
+		if err != nil {
+			bq.errors <- Error{
+				Size:     l,
+				Err:      err,
+				Duration: time.Since(now),
+			}
+		} else {
+			resp.Body.Close()
+
+			bq.successes <- Result{
+				Size:     l,
+				Duration: time.Since(now),
+			}
+		}
+
+		return nil
 	}
 
-	bq.successes <- Result{
-		Size:     l,
-		Duration: time.Since(now),
-	}
-
-	resp.Body.Close()
+	backoff.Retry(operation, backoff.NewExponentialBackOff())
 }
 
 func (bq *Streamer) url(datasetID, tableID string) string {
